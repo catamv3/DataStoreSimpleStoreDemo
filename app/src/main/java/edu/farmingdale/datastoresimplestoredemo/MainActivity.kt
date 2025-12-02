@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -81,14 +85,32 @@ fun DataStoreDemo(modifier: Modifier) {
     var usernameInput by remember { mutableStateOf("") }
 
     Column (modifier = Modifier.padding(50.dp)) {
-        Text("Values = ${appPrefs.value.userName}, " +
-                "${appPrefs.value.highScore}, ${appPrefs.value.darkMode}")
+        // ToDo 4: Display DataStore Values
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Stored DataStore Values",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Username: ${appPrefs.value.userName.ifEmpty { "(not set)" }}")
+                Text("High Score: ${appPrefs.value.highScore}")
+                Text("Dark Mode: ${if (appPrefs.value.darkMode) "Enabled" else "Disabled"}")
+            }
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // ToDo 3
         Text("Username: ${appPrefs.value.userName}")
         Spacer(modifier = Modifier.height(8.dp))
+        //ToDo 2
         TextField(
             value = usernameInput,
             onValueChange = { usernameInput = it },
@@ -96,7 +118,6 @@ fun DataStoreDemo(modifier: Modifier) {
             singleLine = true
         )
         Spacer(modifier = Modifier.height(8.dp))
-        //ToDo 2
         Button(onClick = {
             coroutineScope.launch {
                 store.saveUsername(usernameInput)
@@ -150,6 +171,20 @@ fun DataStoreDemo(modifier: Modifier) {
                     }
                 }
             )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // ToDo 4
+        Button(onClick = {
+            coroutineScope.launch {
+                usernameInput = ""
+                store.saveUsername("")
+                store.saveHighScore(0)
+                store.saveDarkMode(false)
+            }
+        }) {
+            Text("Clear All Values")
         }
     }
 }
