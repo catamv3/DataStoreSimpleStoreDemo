@@ -17,9 +17,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -73,15 +78,27 @@ fun DataStoreDemo(modifier: Modifier) {
     val store = AppStorage(LocalContext.current)
     val appPrefs = store.appPreferenceFlow.collectAsState(AppPreferences())
     val coroutineScope = rememberCoroutineScope()
+    var usernameInput by remember { mutableStateOf("") }
+
     Column (modifier = Modifier.padding(50.dp)) {
         Text("Values = ${appPrefs.value.userName}, " +
                 "${appPrefs.value.highScore}, ${appPrefs.value.darkMode}")
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // ToDo 2
+        Text("Username: ${appPrefs.value.userName}")
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = usernameInput,
+            onValueChange = { usernameInput = it },
+            label = { Text("Enter Username") },
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {
             coroutineScope.launch {
-                store.saveUsername("somevaluehere")
+                store.saveUsername(usernameInput)
             }
         }) {
             Text("Save Username")
