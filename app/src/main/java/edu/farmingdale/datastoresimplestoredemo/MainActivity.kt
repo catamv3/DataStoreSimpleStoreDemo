@@ -107,7 +107,6 @@ fun DataStoreDemo(modifier: Modifier) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ToDo 3
         Text("Username: ${appPrefs.value.userName}")
         Spacer(modifier = Modifier.height(8.dp))
         //ToDo 2
@@ -118,6 +117,7 @@ fun DataStoreDemo(modifier: Modifier) {
             singleLine = true
         )
         Spacer(modifier = Modifier.height(8.dp))
+        //ToDo 3
         Button(onClick = {
             coroutineScope.launch {
                 store.saveUsername(usernameInput)
