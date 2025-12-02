@@ -83,107 +83,111 @@ fun DataStoreDemo(modifier: Modifier) {
     val appPrefs = store.appPreferenceFlow.collectAsState(AppPreferences())
     val coroutineScope = rememberCoroutineScope()
     var usernameInput by remember { mutableStateOf("") }
+    var highScoreInput by remember { mutableStateOf(0) }
+    var darkModeInput by remember { mutableStateOf(false) }
+    var showStoredValues by remember { mutableStateOf(false) }
 
     Column (modifier = Modifier.padding(50.dp)) {
         // ToDo 4: Display DataStore Values
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Stored DataStore Values",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+        if (showStoredValues) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Username: ${appPrefs.value.userName.ifEmpty { "(not set)" }}")
-                Text("High Score: ${appPrefs.value.highScore}")
-                Text("Dark Mode: ${if (appPrefs.value.darkMode) "Enabled" else "Disabled"}")
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Stored DataStore Values",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Username: ${appPrefs.value.userName.ifEmpty { "(not set)" }}")
+                    Text("High Score: ${appPrefs.value.highScore}")
+                    Text("Dark Mode: ${if (appPrefs.value.darkMode) "Enabled" else "Disabled"}")
+                }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Username: ${appPrefs.value.userName}")
+        // Username Input Section
+        Text("Enter Username:")
         Spacer(modifier = Modifier.height(8.dp))
-        //ToDo 2
         TextField(
             value = usernameInput,
             onValueChange = { usernameInput = it },
-            label = { Text("Enter Username") },
+            label = { Text("Username") },
             singleLine = true
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        //ToDo 3
-        Button(onClick = {
-            coroutineScope.launch {
-                store.saveUsername(usernameInput)
-            }
-        }) {
-            Text("Save Username")
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // High Score Controls
-        Text("High Score: ${appPrefs.value.highScore}")
+        // High Score Input Section
+        Text("Set High Score:")
         Spacer(modifier = Modifier.height(8.dp))
         Row {
-            Button(onClick = {
-                coroutineScope.launch {
-                    store.saveHighScore(appPrefs.value.highScore + 10)
-                }
-            }) {
+            Button(onClick = { highScoreInput += 10 }) {
                 Text("+ 10")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                coroutineScope.launch {
-                    store.saveHighScore(appPrefs.value.highScore - 10)
-                }
-            }) {
+            Button(onClick = { if (highScoreInput >= 10) highScoreInput -= 10 }) {
                 Text("- 10")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                coroutineScope.launch {
-                    store.saveHighScore(0)
-                }
-            }) {
-                Text("Reset")
-            }
+            Text("Score: $highScoreInput")
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Dark Mode Toggle
+        // Dark Mode Input Section
         Row {
-            Text("Dark Mode: ${if (appPrefs.value.darkMode) "ON" else "OFF"}")
+            Text("Dark Mode Preference:")
             Spacer(modifier = Modifier.width(16.dp))
             Switch(
-                checked = appPrefs.value.darkMode,
+                checked = darkModeInput,
                 onCheckedChange = { isChecked ->
-                    coroutineScope.launch {
-                        store.saveDarkMode(isChecked)
-                    }
+                    darkModeInput = isChecked
                 }
             )
+            Text(if (darkModeInput) "ON" else "OFF")
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // ToDo 4
-        Button(onClick = {
-            coroutineScope.launch {
-                usernameInput = ""
-                store.saveUsername("")
-                store.saveHighScore(0)
-                store.saveDarkMode(false)
-            }
-        }) {
+        // Save All and Display Button
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    store.saveUsername(usernameInput)
+                    store.saveHighScore(highScoreInput)
+                    store.saveDarkMode(darkModeInput)
+                    showStoredValues = true
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Save All and Display Values")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Clear All Button
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    usernameInput = ""
+                    highScoreInput = 0
+                    darkModeInput = false
+                    store.saveUsername("")
+                    store.saveHighScore(0)
+                    store.saveDarkMode(false)
+                    showStoredValues = false
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Clear All Values")
         }
     }
