@@ -7,10 +7,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -71,13 +76,62 @@ fun DataStoreDemo(modifier: Modifier) {
     Column (modifier = Modifier.padding(50.dp)) {
         Text("Values = ${appPrefs.value.userName}, " +
                 "${appPrefs.value.highScore}, ${appPrefs.value.darkMode}")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(onClick = {
             coroutineScope.launch {
                 store.saveUsername("somevaluehere")
             }
-
         }) {
-            Text("Save Values")
+            Text("Save Username")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // High Score Controls
+        Text("High Score: ${appPrefs.value.highScore}")
+        Spacer(modifier = Modifier.height(8.dp))
+        Row {
+            Button(onClick = {
+                coroutineScope.launch {
+                    store.saveHighScore(appPrefs.value.highScore + 10)
+                }
+            }) {
+                Text("+ 10")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = {
+                coroutineScope.launch {
+                    store.saveHighScore(appPrefs.value.highScore - 10)
+                }
+            }) {
+                Text("- 10")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = {
+                coroutineScope.launch {
+                    store.saveHighScore(0)
+                }
+            }) {
+                Text("Reset")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Dark Mode Toggle
+        Row {
+            Text("Dark Mode: ${if (appPrefs.value.darkMode) "ON" else "OFF"}")
+            Spacer(modifier = Modifier.width(16.dp))
+            Switch(
+                checked = appPrefs.value.darkMode,
+                onCheckedChange = { isChecked ->
+                    coroutineScope.launch {
+                        store.saveDarkMode(isChecked)
+                    }
+                }
+            )
         }
     }
 }
